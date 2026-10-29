@@ -1,41 +1,42 @@
 {
-  "manifest_version": "0.2",
+  "$schema": "https://raw.githubusercontent.com/anthropics/mcpb/main/schemas/mcpb-manifest-v0.4.schema.json",
+  "manifest_version": "0.4",
   "name": "nextcloud-mcp",
-  "version": "0.72.4",
+  "version": "0.202.1",
   "display_name": "Nextcloud MCP",
   "description": "Access your Nextcloud instance (Notes, Calendar, Contacts, Files, Deck, Tables) from Claude Desktop.",
-  "long_description": "Connects Claude Desktop to your Nextcloud server via stdio transport. Supports Notes, Calendar (CalDAV), Contacts (CardDAV), Files (WebDAV), Deck, Tables, and Cookbook. Requires uv (https://docs.astral.sh/uv/) to be installed.",
+  "long_description": "Connects Claude Desktop to your Nextcloud server via stdio transport. Supports Notes, Calendar (CalDAV), Contacts (CardDAV), Files (WebDAV), Deck, Tables, and Cookbook. Claude Desktop installs Python and the dependencies itself; nothing else needs to be installed.",
   "author": {
     "name": "nextcloud-mcp-server contributors"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cbcoutinho/nextcloud-mcp-server"
+    "url": "https://github.com/flinq-ingenieria/nextcloud-mcp-server.git"
   },
-  "homepage": "https://github.com/cbcoutinho/nextcloud-mcp-server",
+  "homepage": "https://github.com/flinq-ingenieria/nextcloud-mcp-server",
+  "documentation": "https://github.com/flinq-ingenieria/nextcloud-mcp-server#readme",
+  "support": "https://github.com/flinq-ingenieria/nextcloud-mcp-server/issues",
   "license": "AGPL-3.0-only",
   "keywords": ["nextcloud", "notes", "calendar", "contacts", "files", "deck"],
   "server": {
-    "type": "python",
-    "entry_point": ".",
+    "type": "uv",
+    "entry_point": "nextcloud_mcp_server/cli.py",
     "mcp_config": {
-      "command": "/bin/sh",
-      "args": ["${__dirname}/run.sh"],
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "--no-dev", "nextcloud-mcp-server", "run", "--transport", "stdio"],
       "env": {
         "NEXTCLOUD_HOST": "${user_config.nextcloud_host}",
         "NEXTCLOUD_USERNAME": "${user_config.nextcloud_username}",
-        "NEXTCLOUD_PASSWORD": "${user_config.nextcloud_password}"
-      },
-      "platform_overrides": {
-        "win32": {
-          "command": "cmd",
-          "args": ["/c", "${__dirname}/run.cmd"]
-        }
+        "NEXTCLOUD_PASSWORD": "${user_config.nextcloud_password}",
+        "NEXTCLOUD_VERIFY_SSL": "${user_config.nextcloud_verify_ssl}"
       }
     }
   },
   "compatibility": {
-    "platforms": ["darwin", "linux", "win32"]
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": {
+      "python": ">=3.11"
+    }
   },
   "tools_generated": true,
   "user_config": {
@@ -54,9 +55,15 @@
     "nextcloud_password": {
       "type": "string",
       "title": "App Password",
-      "description": "A Nextcloud app password (Settings \u2192 Security \u2192 App passwords). Stored securely in the OS keychain.",
+      "description": "A Nextcloud app password (Settings → Security → App passwords). Stored securely in the OS keychain.",
       "sensitive": true,
       "required": true
+    },
+    "nextcloud_verify_ssl": {
+      "type": "boolean",
+      "title": "Verify SSL certificate",
+      "description": "Turn off only for servers with a self-signed certificate.",
+      "default": true
     }
   }
 }
